@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COVID-19 Tracker</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <h1>COVID-19 Tracker</h1>
+
+  <div class="input-container">
+    <input type="text" id="countryInput" placeholder="Enter country name">
+    <button onclick="getCountryData()">Get Data</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    async function getCountryData() {
+      var country = document.getElementById('countryInput').value.trim();
+      if (country === "") {
+        alert("Please type a country name!");
+        return;
+      }
+
+      try {
+        var response = await fetch("https://disease.sh/v3/covid-19/countries/" + country + "?strict=true");
+        if (!response.ok) {
+          throw new Error("Could not find this country.");
+        }
+
+        var data = await response.json();
+
+        var resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `
+          <div class="card">
+            <h3>` + data.country + `</h3>
+            <p>Cases: ` + formatNumber(data.cases) + `</p>
+            <p>Today's Cases: ` + formatNumber(data.todayCases) + `</p>
+            <p>Deaths: ` + formatNumber(data.deaths) + `</p>
+            <p>Today's Deaths: ` + formatNumber(data.todayDeaths) + `</p>
+            <p>Recovered: ` + formatNumber(data.recovered) + `</p>
+            <p>Active: ` + formatNumber(data.active) + `</p>
+          </div>
+        `;
+      } catch (err) {
+        alert("Oops! Something went wrong: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
